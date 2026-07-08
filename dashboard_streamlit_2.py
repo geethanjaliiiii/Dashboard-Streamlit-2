@@ -41,9 +41,11 @@ def load_data():
 
 df = load_data()
 
-st.subheader("🏭 Plant Configuration")
+st.subheader("🏭 Plant & Forecast Configuration")
 
-left, c1, c2, right = st.columns([2, 1, 1, 2])
+available_dates = sorted(df["valid_time_ist"].dt.date.unique())
+
+c1, c2, c3, c4 = st.columns([1, 1.5, 1, 1])
 
 with c1:
     state = st.selectbox(
@@ -57,25 +59,19 @@ with c2:
         ["Pavagada Solar Plant"]
     )
 
-st.subheader("📅 Forecast Selection")
-
-available_dates = sorted(df["valid_time_ist"].dt.date.unique())
-
-left, col_date, col_time, right = st.columns([2, 1, 1, 2])
-
-with col_date:
+with c3:
     selected_date = st.date_input(
-        "Select Date",
+        "Date",
         value=available_dates[-1],
         min_value=available_dates[0],
         max_value=available_dates[-1]
     )
 
-with col_time:
+with c4:
     time_options = pd.date_range("06:30", "17:30", freq="1h").time
-    
+
     selected_time = st.selectbox(
-        "Select Time",
+        "Time",
         options=time_options,
         format_func=lambda t: t.strftime("%I:%M %p")
     )
@@ -101,6 +97,16 @@ else:
 
     left_col, right_col = st.columns(2)
 
+    ymax = max(
+        day_df["Actual_GHI"].max(),
+        day_df["GFS_GHI"].max(),
+        day_df["Predicted_GHI"].max()
+    )
+    
+    ymax = (int(ymax / 100) + 1) * 100
+    
+    tick_times = day_df["valid_time_ist"].dt.strftime("%H:%M").tolist()
+
     with left_col:
         fig1 = go.Figure()
 
@@ -121,10 +127,13 @@ else:
         )
 
         fig1.update_xaxes(
-            tickformat="%H:%M",
-            dtick=3600000
+            tickmode="array",
+            tickvals=day_df["valid_time_ist"],
+            ticktext=tick_times
         )
-
+        
+        fig1.update_yaxes(range=[0, ymax])
+        
         st.plotly_chart(fig1, use_container_width=True)
 
     with right_col:
@@ -159,19 +168,11 @@ else:
         )
 
         fig2.update_xaxes(
-            tickformat="%H:%M",
-            dtick=3600000
+            tickmode="array",
+            tickvals=day_df["valid_time_ist"],
+            ticktext=tick_times
         )
 
-        ymax = max(
-            day_df["Actual_GHI"].max(),
-            day_df["GFS_GHI"].max(),
-            day_df["Predicted_GHI"].max()
-        )
-
-        ymax = (int(ymax / 100) + 1) * 100
-        
-        fig1.update_yaxes(range=[0, ymax])
         fig2.update_yaxes(range=[0, ymax])
 
         st.plotly_chart(fig2, use_container_width=True)
