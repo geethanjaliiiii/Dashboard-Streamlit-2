@@ -214,7 +214,8 @@ else:
                 x=["Before", "After"],
                 y=[mae_before, mae_after],
                 text=[round(mae_before, 2), round(mae_after, 2)],
-                textposition="auto"
+                textposition="auto",
+                marker_color=["steelblue", "red"]
             ))
 
             fig_mae.update_layout(
@@ -233,7 +234,8 @@ else:
                 x=["Before", "After"],
                 y=[rmse_before, rmse_after],
                 text=[round(rmse_before, 2), round(rmse_after, 2)],
-                textposition="auto"
+                textposition="auto",
+                marker_color=["steelblue", "red"]
             ))
 
             fig_rmse.update_layout(
@@ -252,7 +254,8 @@ else:
                 x=["Before", "After"],
                 y=[mape_before, mape_after],
                 text=[round(mape_before, 2), round(mape_after, 2)],
-                textposition="auto"
+                textposition="auto",
+                marker_color=["steelblue", "red"]
             ))
 
             fig_mape.update_layout(
