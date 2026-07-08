@@ -43,25 +43,25 @@ df = load_data()
 
 st.subheader("🏭 Plant Configuration")
 
-c1, c2, c3, c4 = st.columns(4)
+left, c1, c2, right = st.columns([2, 1, 1, 2])
 
 with c1:
-    st.text_input("Country", value="India", disabled=True)
+    state = st.selectbox(
+        "State",
+        ["Karnataka"]
+    )
 
 with c2:
-    st.text_input("State", value="Karnataka", disabled=True)
-
-with c3:
-    st.text_input("Plant Type", value="Solar", disabled=True)
-
-with c4:
-    st.text_input("Plant Name", value="Pavagada Solar Plant", disabled=True)
+    plant = st.selectbox(
+        "Plant Name",
+        ["Pavagada Solar Plant"]
+    )
 
 st.subheader("📅 Forecast Selection")
 
 available_dates = sorted(df["valid_time_ist"].dt.date.unique())
 
-col_date, col_time = st.columns(2)
+left, col_date, col_time, right = st.columns([2, 1, 1, 2])
 
 with col_date:
     selected_date = st.date_input(
@@ -120,6 +120,11 @@ else:
             height=450
         )
 
+        fig1.update_xaxes(
+            tickformat="%H:%M",
+            dtick=3600000
+        )
+
         st.plotly_chart(fig1, use_container_width=True)
 
     with right_col:
@@ -152,5 +157,21 @@ else:
             yaxis_title="GHI",
             height=450
         )
+
+        fig2.update_xaxes(
+            tickformat="%H:%M",
+            dtick=3600000
+        )
+
+        ymax = max(
+            day_df["Actual_GHI"].max(),
+            day_df["GFS_GHI"].max(),
+            day_df["Predicted_GHI"].max()
+        )
+
+        ymax = (int(ymax / 100) + 1) * 100
+        
+        fig1.update_yaxes(range=[0, ymax])
+        fig2.update_yaxes(range=[0, ymax])
 
         st.plotly_chart(fig2, use_container_width=True)
