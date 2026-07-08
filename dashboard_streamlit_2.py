@@ -17,7 +17,10 @@ st.set_page_config(
     layout="wide"
 )
 
-st.title("☀️ Solar Power Forecasting")
+st.markdown(
+    "<h1 style='text-align: center;'>☀️ Solar Power Forecasting & DSM Performance Dashboard</h1>",
+    unsafe_allow_html=True
+)
 
 DATA_PATH = "dashboard_predictions.csv"
 
@@ -69,8 +72,8 @@ with col_date:
     )
 
 with col_time:
-    time_options = pd.date_range("06:30", "17:30", freq="1H").time
-
+    time_options = pd.date_range("06:30", "17:30", freq="1h").time
+    
     selected_time = st.selectbox(
         "Select Time",
         options=time_options,
