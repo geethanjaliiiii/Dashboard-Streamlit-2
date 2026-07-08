@@ -9,6 +9,7 @@ Original file is located at
 
 import streamlit as st
 import pandas as pd
+import numpy as np
 import plotly.graph_objects as go
 from datetime import time
 
@@ -176,3 +177,92 @@ else:
         fig2.update_yaxes(range=[0, ymax])
 
         st.plotly_chart(fig2, use_container_width=True)
+
+
+    # =====================================================
+    # DAILY ERROR METRICS: BEFORE VS AFTER
+    # =====================================================
+
+    eval_df = day_df.dropna(
+        subset=["Actual_GHI", "GFS_GHI", "Predicted_GHI"]
+    ).copy()
+
+    # Avoid MAPE issue when actual GHI is very small
+    eval_df = eval_df[eval_df["Actual_GHI"] > 50]
+
+    if not eval_df.empty:
+
+        actual = eval_df["Actual_GHI"]
+        before = eval_df["GFS_GHI"]
+        after = eval_df["Predicted_GHI"]
+
+        mae_before = (actual - before).abs().mean()
+        mae_after = (actual - after).abs().mean()
+
+        rmse_before = np.sqrt(((actual - before) ** 2).mean())
+        rmse_after = np.sqrt(((actual - after) ** 2).mean())
+
+        mape_before = ((actual - before).abs() / actual).mean() * 100
+        mape_after = ((actual - after).abs() / actual).mean() * 100
+
+        metric_col1, metric_col2, metric_col3 = st.columns(3)
+
+        with metric_col1:
+            fig_mae = go.Figure()
+
+            fig_mae.add_trace(go.Bar(
+                x=["Before", "After"],
+                y=[mae_before, mae_after],
+                text=[round(mae_before, 2), round(mae_after, 2)],
+                textposition="auto"
+            ))
+
+            fig_mae.update_layout(
+                title="MAE: Before vs After",
+                xaxis_title="Model",
+                yaxis_title="MAE",
+                height=350
+            )
+
+            st.plotly_chart(fig_mae, use_container_width=True)
+
+        with metric_col2:
+            fig_rmse = go.Figure()
+
+            fig_rmse.add_trace(go.Bar(
+                x=["Before", "After"],
+                y=[rmse_before, rmse_after],
+                text=[round(rmse_before, 2), round(rmse_after, 2)],
+                textposition="auto"
+            ))
+
+            fig_rmse.update_layout(
+                title="RMSE: Before vs After",
+                xaxis_title="Model",
+                yaxis_title="RMSE",
+                height=350
+            )
+
+            st.plotly_chart(fig_rmse, use_container_width=True)
+
+        with metric_col3:
+            fig_mape = go.Figure()
+
+            fig_mape.add_trace(go.Bar(
+                x=["Before", "After"],
+                y=[mape_before, mape_after],
+                text=[round(mape_before, 2), round(mape_after, 2)],
+                textposition="auto"
+            ))
+
+            fig_mape.update_layout(
+                title="MAPE: Before vs After",
+                xaxis_title="Model",
+                yaxis_title="MAPE (%)",
+                height=350
+            )
+
+            st.plotly_chart(fig_mape, use_container_width=True)
+
+    else:
+        st.warning("Not enough valid daytime data to calculate daily error metrics.")
